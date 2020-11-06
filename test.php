@@ -1,1 +1,1 @@
-<?php asdas ?>
+<?php echo "hi"; ?>
