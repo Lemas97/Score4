@@ -1,21 +1,19 @@
-<?php 
-    class DBConection{
-    
-        public $conn;
+<?php
+$host='localhost';
+$db = 'score4';
+require_once "dbdetails.php";
 
-        public function dbConnect(){
-            
-            $conn = pg_connect("host='dblabs.it.teithe.gr' port='5432' dbname='it164630' user='it164630' password='123456789'");
-            
-            if($conn){
-                echo 'Connection attempt succeeded.';
-            }else{
-                echo 'Connection attempt failed.';
-            }
+$user=$DB_USER;
+$pass=$DB_PASS;
 
-            return conn;
-            
-        }
-    }
 
-?>
+if(gethostname()=='users.iee.ihu.gr') {
+	$mysqli = new mysqli($host, $user, $pass, $db,null,'/home/staff/asidirop/mysql/run/mysql.sock');
+} else {
+        $mysqli = new mysqli($host, $user, $pass, $db);
+}
+
+if ($mysqli->connect_errno) {
+    echo "Failed to connect to MySQL: (" . 
+    $mysqli->connect_errno . ") " . $mysqli->connect_error;
+}?>
