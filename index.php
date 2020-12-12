@@ -1,18 +1,11 @@
 <?php 
+    require_once "lib/Player.php";
+    require_once "lib/dbconnect.php";
 
 
 
-    function registerPlayer($name,$username,$password){
-        newPlayer = new Player($name,$username,$password);
-    }
-
-    function login($username,$password){
 
 
-    }
-    
 
-    function logout(){
 
-    }
 ?>
