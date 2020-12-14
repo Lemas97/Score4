@@ -22,8 +22,15 @@
 
         }
 
-        function get_username(){
-            return $this->username;
+        function show_player($b) {
+            global $mysqli;
+            $sql = 'select username,piece_color from players where piece_color=?';
+            $st = $mysqli->prepare($sql);
+            $st->bind_param('s',$b);
+            $st->execute();
+            $res = $st->get_result();
+            header('Content-type: application/json');
+            print json_encode($res->fetch_all(MYSQLI_ASSOC), JSON_PRETTY_PRINT);
         }
     }
 
