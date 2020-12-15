@@ -16,12 +16,14 @@ require_once "dbconnect.php";
                 $board[$i][$y] = $value["piece_color"];
 
             }
-
             $this->topOfEachColumn = array(0,0,0,0,0,0,0);
-
         }
 
         function move($color, $x){
+            global $mysqli;
+            $this->topOfEachColumn[$x]++;
+            $sql = "update board set piece_color =  $color where x = $x and y = $this->topOfEachColumn[$x]";
+            $mysqli->query($sql);
 
         }
         private function updateTop(){
@@ -30,7 +32,7 @@ require_once "dbconnect.php";
 
         private function isWinningMove($x, $color){
             $flag = false;
-            if($this->top[$x]>=4) {
+            if($this->topOfEachColumn[$x]>=4) {
                 $flag = $this->vertical( $x , $color);
             }
             if ($flag==false){
@@ -49,7 +51,7 @@ require_once "dbconnect.php";
 
         private function vertical($x,$playing){
             $streak=0;
-            $i=$top[$x];
+            $i=$this->topOfEachColumn[$x];
             while ($this->board[$x][$i] == $playing and $i>=0){
                 $streak++;
                 $i--;
@@ -60,14 +62,14 @@ require_once "dbconnect.php";
         private function backDia($x,$playing){
             $streak=0;
             $i=$x;
-            $y=$top[$x];
+            $y=$this->topOfEachColumn[$x];
             while ($this->board[$x][$i] == $playing and $i<7  and $y<6){
                 $streak++;
                 $i++;
                 $y++;
             }
             $i=$x -1 ;
-            $y=$top[$x] - 1;
+            $y=$this->topOfEachColumn[$x] - 1;
             while ($this->board[$x][$i] == $playing and $i>=0 and $y>=0){
                 $streak++;
                 $i--;
@@ -79,15 +81,15 @@ require_once "dbconnect.php";
         private function frontDia($x,$playing){
             $streak=0;
             $i=$x;
-            $y=$top[$x];
-            while ($board[$x][$i] == $playing and $i<7 and $y>=0){
+            $y=$this->topOfEachColumn[$x];
+            while ($this->board[$x][$i] == $playing and $i<7 and $y>=0){
                 $streak++;
                 $i++;
                 $y--;
             }
             $i=$x -1;
-            $y=$top[$x] + 1;
-            while ($board[$x][$i] == $playing and $i>=0 and $y<6){
+            $y=$this->topOfEachColumn[$x] + 1;
+            while ($this->board[$x][$i] == $playing and $i>=0 and $y<6){
                 $streak++;
                 $i--;
                 $y++;
@@ -122,7 +124,7 @@ require_once "dbconnect.php";
         private function lastMoveColor(){
         }
         function getBoard($x,$y){
-            return board[$x][$y];
+            return $this->board[$x][$y];
 
         }
 

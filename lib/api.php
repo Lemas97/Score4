@@ -13,10 +13,16 @@ $r = array_shift($request);
 if ($r == 'resetboard'){
 
     $_SESSION['board']=new Board();
+    $_SESSION['playing']='r';
 
 }elseif ($r == 'makemove') {
-    $board = $_SESSION["board"];
     $color = $input["color"];
+    if($_SESSION['playing']==$color){
+        $board = $_SESSION["board"];
+
+    }
+
+
     $x = $input["x"];
     $board->move($color, $x);
     $timi = $board->getBoard(1,1);
