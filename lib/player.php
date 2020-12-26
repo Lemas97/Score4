@@ -6,19 +6,14 @@
         private $username;
         private $password;
 
-        public function __construct($username,$password)
+        private $color;
+
+        public function __construct($username,$password, $playerID,$color)
         {
             $this->username = $username;
             $this->password = $password;
-            $this->playerID = uniqid();
-
-            global $mysqli;
-            $sql = "insert into player (playerID , username, password) values ('$this->playerID','$this->username', '$this->password')";
-            if ($mysqli->query($sql) == true){
-                echo "New record created successfully";
-            } else {
-                echo "Error: " . $sql . "<br>" . $mysqli->error;
-            }
+            $this->playerID = $playerID;
+            $this->color = $color;
 
         }
 
@@ -31,6 +26,18 @@
             $res = $st->get_result();
             header('Content-type: application/json');
             print json_encode($res->fetch_all(MYSQLI_ASSOC), JSON_PRETTY_PRINT);
+        }
+
+        function setColor($c){
+            $this->color = $c;
+        }
+
+        function getColor(){
+            return $this->color;
+        }
+
+        function getUsername(){
+            return $this->username;
         }
     }
 
