@@ -14,47 +14,34 @@ if ($r == 'resetboard' && $method == 'GET') {
     $_SESSION['playing'] = 'r'; //Παίζει πρώτος ο κόκκινος
 
 } elseif ($r == 'makemove' && $method == 'POST') {
-    $color = $input["color"]; //Αποθηκεύεται το χρώμα που έπαιξε
-    $x = $input["x"]; //Αποθηκεύεται η στήλη που έγινε η κίνηση
-    if ($_SESSION['playing'] == $color) { //Αν το χρώμα είναι ίδιο με το χρώμα της σειράς
-        $board = $_SESSION["board"];
-        $y = $board->checkTopOfX($x); //Έλεγχος αν επιτρέπεται η κίνηση λόγω ύψους στήλης
-        if ($y) {
-            $winFlag = $board->move(strtoupper($color), $x); //Γίνεται η κίνηση
-            $_SESSION["board"] = $board; //Σώζεται το νέο board
-            if ($winFlag) {
-
-                if ($input['outputType'] == "json") {
-                    print json_encode(['winmesg' => "Κέρδισε ο ". $_SESSION[$_SESSION['playing']]."!"]);
-                } else {
-                    echo "Κέρδισε ο ". $_SESSION[$_SESSION['playing']]."!";
+    if(isset($_SESSION[$input['username']]) && $_SESSION[$input['username']]->checkStatus()) {
+        $userColor = $_SESSION[$input['username']]->getColor();
+        $x = $input["x"]; //Αποθηκεύεται η στήλη που έγινε η κίνηση
+        if ($_SESSION['playing'] == $userColor) { //Αν το χρώμα είναι ίδιο με το χρώμα της σειράς
+            $board = $_SESSION["board"];
+            $y = $board->checkTopOfX($x); //Έλεγχος αν επιτρέπεται η κίνηση λόγω ύψους στήλης
+            if ($y) {
+                $winFlag = $board->move(strtoupper($userColor), $x); //Γίνεται η κίνηση
+                $_SESSION["board"] = $board; //Σώζεται το νέο board
+                if ($winFlag) {
+                    print json_encode(['winmesg' => "Κέρδισε ο " . $input['username'] . "!"]);
+                    $_SESSION['board'] = new Board();
                 }
 
-                $_SESSION['board'] = new Board();
-            }
-
-            if ($_SESSION['playing'] == 'R') {
-                $_SESSION['playing'] = 'Y';
+                if ($_SESSION['playing'] == 'R') {
+                    $_SESSION['playing'] = 'Y';
+                } else {
+                    $_SESSION['playing'] = 'R';
+                }
             } else {
-                $_SESSION['playing'] = 'R';
-            }
-        } else {
-            if ($input["outputType"] == 'json') {
                 print json_encode(['errormesg' => "Δεν μπορείς να τοποθετήσεις στο $x"]);
-            } else {
-                echo "Δεν μπορείς να τοποθετήσεις στο $x";
             }
-        }
-    } else {
-        if ($input["outputType"] == 'json') {
-            print json_encode(['errormesg' => "Δεν είναι η σειρά σου. Σειρά έχει ο " . $_SESSION[$_SESSION['playing']]]);
         } else {
-
-            echo "Δεν είναι η σειρά σου. Σειρά έχει ο ". $_SESSION[$_SESSION['playing']] ;
+            print json_encode(['errormesg' => "Δεν είναι η σειρά σου. Σειρά έχει ο " . $_SESSION[$_SESSION['playing']]]);
         }
-
+    }else{
+        print json_encode(['errormesg' => "Δεν είσαι συνδεδεμένος και δεν μπορείς να εκτελέσεις αυτήν την λειτουργία!"]);
     }
-
 } elseif ($r == 'showboard' && $method == 'GET') {
     $board = $_SESSION['board'];
     if ($input['outputType'] == "json") {
@@ -64,80 +51,29 @@ if ($r == 'resetboard' && $method == 'GET') {
     }
 
 } elseif ($r == 'login' && $method == 'GET') {
-    global $mysqli;
-    $username = $input['username'];
-    $password = $input['password'];
 
-    $sql = "select * from player where username = '$username'";
-    $result = $mysqli->query($sql);
-    $c = 'R';
+    if(!isset($input['username']) or !isset($input['password'])) {
+        header("HTTP/1.1 400 Bad Request");
+        print json_encode(['errormesg'=>"Δεν έδωσες username ή password."]);
+        exit;
+    }else {
+        $username = $input['username'];
+        $password = $input['password'];
 
-    foreach ($result as $value) {
-
-        if (isset($value["username"])) {
-
-            if ($password == $value['password']) {
-
-                $sql = "select * from logedin";
-                $logedin = $mysqli->query($sql);
-
-                if($logedin->num_rows == 1){
-                    foreach ($logedin as $value2 ){
-                        if($value2['username'] == $username){
-                            echo "Είσαι ήδη συνδεδεμένος";
-                        }else{
-                            if($value2['color']=='R'){
-                                $c='Y';
-                            }
-                            $playerID = $value['playerID'];
-                            $sql = "insert into logedin (username,color) values('$username','$c')";
-                            $mysqli->query($sql);
-
-                            $_SESSION[$c] = $username;
-                            $_SESSION[$username] = new Player($username, $password, $playerID, $c);
-                            echo 'Συνδέθηκες με επιτυχία!';
-
-                        }
-                    }
-
-                }else{
-                    $playerID = $value['playerID'];
-                    $sql = "insert into logedin (username,color) values('$username','$c')";
-                    $mysqli->query($sql);
-
-                    $_SESSION[$c] = $username;
-                    $_SESSION[$username] = new Player($username, $password, $playerID, $c);
-                    echo 'Συνδέθηκες με επιτυχία!';
-
-
-                }
-
-
-
-            }
-
-
-        } else {
-            echo "Λάθος password!";
-        }
+        $_SESSION[$username] = new Player($username,$password);
     }
-
 
 } elseif ($r == 'logout' && $method == 'GET') {
-    global $mysqli;
-    $username = $input['username'];
-    $player = $_SESSION[$username];
+    if(isset($_SESSION[$input['username']]) && $_SESSION[$input['username']]->checkStatus()) {
 
-    if ($player->getUsername() == $username) {
+        $_SESSION[$input['username']]->logout();
 
-        $sql = "delete from logedin where username = '$username'";
-        $mysqli->query($sql);
 
-        unset($_SESSION[$username]);
-        echo "Αποσυνδέθηκες επιτυχώς!";
+
+
+    }else{
+        print json_encode(['errormesg' => "Δεν είσαι συνδεδεμένος και δεν μπορείς να εκτελέσεις αυτήν την λειτουργία!"]);
     }
-
-
 } else {
     header("HTTP/1.1 404 Not Found");
 }
