@@ -3,20 +3,20 @@ require_once "dbconnect.php";
     class Board {
 
         private $board;
-        private $topOfEachColumn;
+        private $topOfEachColumn; //Το υψηλότερο πιόνι σε κάθε στήλη
 
         public function __construct(){
             global $mysqli;
 
-            $sql = 'replace into board select * from board_empty';
+            $sql = 'replace into board select * from board_empty'; //Reset του πίνακα board
             $mysqli->query($sql);
 
             $this->boardFillFromDB();
 
-            $this->topOfEachColumn = array(0,0,0,0,0,0,0,0);
+            $this->topOfEachColumn = array(0,0,0,0,0,0,0,0); //Αρχικοποίηση του top για κάθε στήλη
 
             for ($i=1; $i<=7; $i++){
-                $sql = "update topofx set top=0 where x=$i";
+                $sql = "update topofx set top=0 where x=$i"; //Reset του topofx στην βάση
                 $mysqli->query($sql);
 
             }

@@ -8,7 +8,7 @@ $request = explode('/', trim($_SERVER['PATH_INFO'], '/'));
 $input = json_decode(file_get_contents('php://input'), true);
 $r = array_shift($request);
 
-if ($r == 'resetboard' && $method == 'GET') {
+if ($r == 'resetboard' && $method == 'POST') {
 
     $_SESSION['board'] = new Board(); //Αρχικοποίηση board σε Session για να μην το χάσω
     $_SESSION['playing'] = 'r'; //Παίζει πρώτος ο κόκκινος
@@ -22,60 +22,73 @@ if ($r == 'resetboard' && $method == 'GET') {
             $y = $board->checkTopOfX($x); //Έλεγχος αν επιτρέπεται η κίνηση λόγω ύψους στήλης
             if ($y) {
                 $winFlag = $board->move(strtoupper($userColor), $x); //Γίνεται η κίνηση
-                $_SESSION["board"] = $board; //Σώζεται το νέο board
-                if ($winFlag) {
+                $_SESSION["board"] = $board; //Σώζεται το board μετά την κίνηση
+
+                if ($winFlag) { //Αν η κίνηση είναι νικητήρια εμφάνισε τον νικητή και κάνε reset το board
                     print json_encode(['winmesg' => "Κέρδισε ο " . $input['username'] . "!"]);
                     $_SESSION['board'] = new Board();
                 }
 
-                if ($_SESSION['playing'] == 'R') {
+                if ($_SESSION['playing'] == 'R') { //Αλλαγή του επόμενου παίχτη σύμφωνα με το χρώμα
                     $_SESSION['playing'] = 'Y';
                 } else {
                     $_SESSION['playing'] = 'R';
                 }
             } else {
+                //Αν η στήλη x που επιλέχθηκε είναι γεμάτη
+                header("HTTP/1.1 400 Bad Request");
                 print json_encode(['errormesg' => "Δεν μπορείς να τοποθετήσεις στο $x"]);
             }
         } else {
+            //Αν το χρώμα του παίκτη που παίζει δεν αντιστοιχεί στο δικό σου
+            header("HTTP/1.1 400 Bad Request");
             print json_encode(['errormesg' => "Δεν είναι η σειρά σου. Σειρά έχει ο " . $_SESSION[$_SESSION['playing']]]);
         }
     }else{
+        //Αν προσπαθήσει να κάνει κίνηση χωρίς να είναι συνδεδεμένος
+        header("HTTP/1.1 400 Bad Request");
         print json_encode(['errormesg' => "Δεν είσαι συνδεδεμένος και δεν μπορείς να εκτελέσεις αυτήν την λειτουργία!"]);
     }
 } elseif ($r == 'showboard' && $method == 'GET') {
+
     $board = $_SESSION['board'];
-    if ($input['outputType'] == "json") {
+    if ($input['outputType'] == "json") {//Για λόγους debugging και κατανόησης του board τον εμφανίζω κατάλληλα.
         print json_encode($board->getBoard(), JSON_PRETTY_PRINT);
     } else {
         $board->show_board();
     }
 
-} elseif ($r == 'login' && $method == 'GET') {
+} elseif ($r == 'login' && $method == 'POST') {
 
     if(!isset($input['username']) or !isset($input['password'])) {
         header("HTTP/1.1 400 Bad Request");
         print json_encode(['errormesg'=>"Δεν έδωσες username ή password."]);
         exit;
     }else {
+        //Αν δόθηκε password και username
         $username = $input['username'];
         $password = $input['password'];
-
         $_SESSION[$username] = new Player($username,$password);
     }
 
 } elseif ($r == 'logout' && $method == 'GET') {
-    if(isset($_SESSION[$input['username']]) && $_SESSION[$input['username']]->checkStatus()) {
-
-        $_SESSION[$input['username']]->logout();
-
-
-
-
+    $username = $_GET['username'];
+    if(isset($_SESSION[$username]) && $_SESSION[$username]->checkStatus()) {
+        //Αν υπάρχει στο Session το username και είναι συνδεδεμένο το username κάνει logout
+        $_SESSION[$username]->logout();
     }else{
-        print json_encode(['errormesg' => "Δεν είσαι συνδεδεμένος και δεν μπορείς να εκτελέσεις αυτήν την λειτουργία!"]);
+        if(isset($_SESSION[$username])) {
+            header("HTTP/1.1 400 Bad Request");
+            print json_encode(['errormesg' => "Δεν είσαι συνδεδεμένος και δεν μπορείς να εκτελέσεις αυτήν την λειτουργία!"]);
+        }else{
+            header("HTTP/1.1 400 Bad Request");
+            print json_encode(['errormesg'=>"Δεν έδωσες username."]);
+
+        }
     }
 } else {
-    header("HTTP/1.1 404 Not Found");
+    header("HTTP/1.1 400 Bad Request");
+
 }
 
 exit;
