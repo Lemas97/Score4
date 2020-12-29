@@ -1,5 +1,6 @@
 Table of Contents
 =================
+
     * [Περιγραφή API](#περιγραφή-api)
         *[Methods](#)
 
@@ -7,10 +8,15 @@ Table of Contents
 
 
 <a name="περιγραφή-api"></a>
+
 #Περιγραφή API
+
 ##Methods
+
 ###Board
+
 ####Ανάγνωση Board
+
 ```
 GET /showboard/
 ```
@@ -19,6 +25,7 @@ GET /showboard/
 
 
 ####Αρχικοποίηση Board
+
 ```
 POST /resetboard/
 ```
@@ -26,6 +33,7 @@ POST /resetboard/
 Αδιάζει το Board από τα πούλια. 
 
 ####Κίνηση 
+
 ```
 POST /makemove/:username/:x
 ```
