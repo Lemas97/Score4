@@ -1,5 +1,10 @@
+_Το project είναι για την εργασία του μαθήματος ΑΔΙΣΕ_<br>
+_Ονοματεπώνυμο: Αλεξιάδης-Σελαμανίδης Τηλέμαχος_<br>
+_ΑΜ: 164630_
+
 Table of Contents
 =================
+* [Περιγραφή Παιχνιδιού](#περιγραφή-παιχνιδιού)
 * [Περιγραφή API](#περιγραφή-api)
     * [Methods](#api-methods)
         * [Board](#api-board)
@@ -9,14 +14,18 @@ Table of Contents
         * [Player](#api-player)
             * [Login](#api-login)
             * [Logout](#api-logout)
-* [Login](#classes)
+* [Classes](#classes)
     * [Board](#classes-board)
         * [Fields](#board-fields)
         * [Methods](#board-methods)
     * [Player](#classes-player)
         * [Fileds](#player-fields)
         * [Methods](#player-methods)
-    
+
+<a name="περιγραφή-παιχνιδιού"></a>
+# Περιγραφή Παιχνιδιού
+Το παιχνίδι ονομάζεται score 4 και σκοπός του παίκτη είναι να τοποθετήσει τα πιόνια του έτσι ώστε να σχεδιάσει 4 συνεχόμενα
+ως προς οποιαδήποτε κατεύθυνση.
 
 <a name="περιγραφή-api"></a>
 # Περιγραφή API
@@ -49,7 +58,7 @@ POST /resetboard/
 #### Κίνηση 
 
 ```
-POST /makemove/:username/:x
+POST /makemove/:username/:x/
 ```
 Json Data:
 
@@ -153,4 +162,3 @@ GET /logout/:username/
 | 'login'            | username, password | Ελέγχει στην βάση αν ο παίκτης είναι ήδη συνδεδεμένος και αν όχι, ελέγχει αν είναι έγκυρα το username και το password ώστε να αλλάξει το status του παίκτη σε 1 και να του δώσει χρώμα |
 | 'logout'           | -                  | Ελέγχει αν ο παίκτης είναι συνδεδεμένος ώστε να του αλλάξει το status σε 0 και να του αφαιρέσει το χρώμα πιονιού              |
 | 'checkStatus'      | -                  | Ελέγχει αν το παίκτης είναι συνδεδεμένος και επιστρέφει false ή true             |
-
