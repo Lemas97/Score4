@@ -52,7 +52,7 @@ if ($r == 'resetboard' && $method == 'POST') {
 } elseif ($r == 'showboard' && $method == 'GET') {
 
     $board = $_SESSION['board'];
-    if ($input['outputType'] == "json") {//Για λόγους debugging και κατανόησης του board τον εμφανίζω κατάλληλα.
+    if ($_GET['outputType'] == "json") {//Για λόγους debugging και κατανόησης του board τον εμφανίζω κατάλληλα.
         print json_encode($board->getBoard(), JSON_PRETTY_PRINT);
     } else {
         $board->show_board();

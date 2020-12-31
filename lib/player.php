@@ -2,7 +2,6 @@
 require_once "dbconnect.php";
 class Player
 {
-
     private $username;
     private $status=0; //Αν είναι συνδεδεμένος γίνεται 1 διαφορετικά είναι 0
     private $color; //Παίρνει χρώμα πιονιού όταν συνδεθεί ανάλογα ποιο είναι διαθέσιμο
@@ -11,7 +10,6 @@ class Player
     {
         $this->login($username,$password);
     }
-
 
     function getColor()
     {
