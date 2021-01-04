@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 04, 2021 at 12:13 PM
+-- Generation Time: Jan 04, 2021 at 12:21 PM
 -- Server version: 10.4.14-MariaDB
 -- PHP Version: 7.2.34
 
@@ -20,6 +20,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `score4`
 --
+CREATE DATABASE IF NOT EXISTS `score4` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `score4`;
 
 -- --------------------------------------------------------
 
