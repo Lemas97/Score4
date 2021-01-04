@@ -4,6 +4,7 @@ require_once "dbconnect.php";
 
         private $board;
         private $topOfEachColumn; //Το υψηλότερο πιόνι σε κάθε στήλη
+        private $turn;
 
         public function __construct(){
             global $mysqli;
@@ -232,6 +233,28 @@ require_once "dbconnect.php";
         function getBoard(){
             //Χρησιμοποιείται στο api ώστε να πάρει το τον πίνακα board και να το εμφανίσει σε μορφή json
             return $this->board;
+        }
+
+        function checkTurn(){
+            global $mysqli;
+            $sql ="select turn from game_status";
+            $result = $mysqli->query($sql);
+
+            foreach ($result as $turn){
+                $this->turn = $turn['turn'];
+            }
+            return $this->turn;
+        }
+        function updateNextTurn(){
+            global $mysqli;
+
+            if($this->checkTurn()=='R') {
+                $sql = 'update game_status set turn = "Y"';
+            }else{
+                $sql = 'update game_status set turn = "R"';
+            }
+            $mysqli->query($sql);
+
         }
     }
 ?>

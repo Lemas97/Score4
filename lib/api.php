@@ -11,29 +11,30 @@ $r = array_shift($request);
 if ($r == 'resetboard' && $method == 'POST') {
 
     $_SESSION['board'] = new Board(); //Αρχικοποίηση board σε Session για να μην το χάσω
-    $_SESSION['playing'] = 'r'; //Παίζει πρώτος ο κόκκινος
+    $_SESSION['playing'] = 'R'; //Παίζει πρώτος ο κόκκινος
 
 } elseif ($r == 'makemove' && $method == 'POST') {
     if(isset($_SESSION[$input['username']]) && $_SESSION[$input['username']]->checkStatus()) {
         $userColor = $_SESSION[$input['username']]->getColor();
         $x = $input["x"]; //Αποθηκεύεται η στήλη που έγινε η κίνηση
-        if ($_SESSION['playing'] == $userColor) { //Αν το χρώμα είναι ίδιο με το χρώμα της σειράς
+        if ($_SESSION['board']->checkTurn() == $userColor) { //Αν το χρώμα είναι ίδιο με το χρώμα της σειράς
             $board = $_SESSION["board"];
             $y = $board->checkTopOfX($x); //Έλεγχος αν επιτρέπεται η κίνηση λόγω ύψους στήλης
             if ($y) {
                 $winFlag = $board->move(strtoupper($userColor), $x); //Γίνεται η κίνηση
+                $board->updateNextTurn();
                 $_SESSION["board"] = $board; //Σώζεται το board μετά την κίνηση
 
                 if ($winFlag) { //Αν η κίνηση είναι νικητήρια εμφάνισε τον νικητή και κάνε reset το board
-                    print json_encode(['winmesg' => "Κέρδισε ο " . $input['username'] . "!"]);
+                    if ($_GET['outputType'] == "json") {//Για λόγους debugging και κατανόησης του board τον εμφανίζω κατάλληλα.
+                        print json_encode($board->getBoard(), JSON_PRETTY_PRINT);
+                    } else {
+                        $board->show_board();
+                    }
+                    print json_encode(['winmesg' => "The winner is " . $input['username'] . "!"]);
                     $_SESSION['board'] = new Board();
                 }
 
-                if ($_SESSION['playing'] == 'R') { //Αλλαγή του επόμενου παίχτη σύμφωνα με το χρώμα
-                    $_SESSION['playing'] = 'Y';
-                } else {
-                    $_SESSION['playing'] = 'R';
-                }
             } else {
                 //Αν η στήλη x που επιλέχθηκε είναι γεμάτη
                 header("HTTP/1.1 400 Bad Request");
@@ -88,7 +89,6 @@ if ($r == 'resetboard' && $method == 'POST') {
     }
 } else {
     header("HTTP/1.1 400 Bad Request");
-
 }
 
 exit;
