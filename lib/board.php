@@ -241,20 +241,28 @@ require_once "dbconnect.php";
             $result = $mysqli->query($sql);
 
             foreach ($result as $turn){
-                $this->turn = $turn['turn'];
+                $this->turn['color'] = $turn['turn'];
+                $color = $turn['turn'];
             }
-            return $this->turn;
-        }
-        function updateNextTurn(){
-            global $mysqli;
 
-            if($this->checkTurn()=='R') {
+            $sql ="select username from player where color = '$color'";
+            $result = $mysqli->query($sql);
+            foreach ($result as $turn){
+                $this->turn['username'] = $turn['username'];
+            }
+
+            return $this->turn;             //Επιστρέφει το χρώμα και το usarname του παίκτη που έχει σειρά.
+        }
+
+        function updateNextTurn(){  //Αλλάζει το χρώμα που έχει σειρά στην βάση.
+            global $mysqli;
+            $turn = $this->checkTurn();
+            if($turn['color']=='R') {
                 $sql = 'update game_status set turn = "Y"';
             }else{
                 $sql = 'update game_status set turn = "R"';
             }
             $mysqli->query($sql);
-
         }
     }
 ?>

@@ -16,19 +16,19 @@ if ($r == 'resetboard' && $method == 'POST') {
     if(isset($_SESSION[$input['username']]) && $_SESSION[$input['username']]->checkStatus()) {
         $userColor = $_SESSION[$input['username']]->getColor();
         $x = $input["x"]; //Αποθηκεύεται η στήλη που έγινε η κίνηση
-        if ($_SESSION['board']->checkTurn() == $userColor) { //Αν το χρώμα είναι ίδιο με το χρώμα της σειράς
+        $turn = $_SESSION['board']->checkTurn(); //Παίρνει το color και το username που έχει σειρά
+        if ($turn['color'] == $userColor) { //Αν το χρώμα είναι ίδιο με το χρώμα της σειράς
             $board = $_SESSION["board"];
             $y = $board->checkTopOfX($x); //Έλεγχος αν επιτρέπεται η κίνηση λόγω ύψους στήλης
             if ($y) {
                 $winFlag = $board->move(strtoupper($userColor), $x); //Γίνεται η κίνηση
                 $board->updateNextTurn();
                 $_SESSION["board"] = $board; //Σώζεται το board μετά την κίνηση
+                $board->show_board(); //Εμφανίζει με html το board ώστε να φαίνεται η κίνηση επειδή δεν έχω ui
 
                 if ($winFlag) { //Αν η κίνηση είναι νικητήρια εμφάνισε τον νικητή και κάνε reset το board
-                    if ($_GET['outputType'] == "json") {//Για λόγους debugging και κατανόησης του board τον εμφανίζω κατάλληλα.
+                    if ($input['outputType'] == "json") {//Για λόγους debugging και κατανόησης του board τον εμφανίζω κατάλληλα
                         print json_encode($board->getBoard(), JSON_PRETTY_PRINT);
-                    } else {
-                        $board->show_board();
                     }
                     print json_encode(['winmesg' => "The winner is " . $input['username'] . "!"]);
                     $_SESSION['board'] = new Board();
@@ -42,7 +42,7 @@ if ($r == 'resetboard' && $method == 'POST') {
         } else {
             //Αν το χρώμα του παίκτη που παίζει δεν αντιστοιχεί στο δικό σου
             header("HTTP/1.1 400 Bad Request");
-            print json_encode(['errormesg' => "Δεν είναι η σειρά σου. Σειρά έχει ο " . $_SESSION[$_SESSION['playing']]]);
+            print json_encode(['errormesg' => "Δεν είναι η σειρά σου. Σειρά έχει ο " .$turn['username']]);
         }
     }else{
         //Αν προσπαθήσει να κάνει κίνηση χωρίς να είναι συνδεδεμένος
@@ -52,7 +52,7 @@ if ($r == 'resetboard' && $method == 'POST') {
 } elseif ($r == 'showboard' && $method == 'GET') {
 
     $board = $_SESSION['board'];
-    if ($_GET['outputType'] == "json") {//Για λόγους debugging και κατανόησης του board τον εμφανίζω κατάλληλα.
+    if ($_GET['outputType'] == "json") {//Για λόγους debugging και κατανόησης του board εμφανίζεται κατάλληλα
         print json_encode($board->getBoard(), JSON_PRETTY_PRINT);
     } else {
         $board->show_board();
