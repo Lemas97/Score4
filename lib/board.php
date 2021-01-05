@@ -139,7 +139,7 @@ require_once "dbconnect.php";
 
             $y=$this->topOfEachColumn[$x]; //y = ύψος κίνησης στην στήλη
 
-            while ($i<7  and $y<6 and $this->board[$y][$i] == $color ){
+            while ($i<7  and $y<=6 and $this->board[$y][$i] == $color ){
                 /*Ψάχνει διαγώνια προς τα πάνω και δεξιά
                  Όσο το i δεν ξεπερνάει την τέρμα δεξιά στήλη και όσο το y δεν ξεπερνάει το ύψος της στήλης
                 και όσο το χρώμα του πιονιού της τελευταίας κίνησης είναι ίδιο με το χρώμα του board[y][i]
@@ -182,7 +182,7 @@ require_once "dbconnect.php";
             }
             $i=$x -1;
             $y=$this->topOfEachColumn[$x] + 1;
-            while ($i>0 and $y<6 and $this->board[$y][$i] == $color){
+            while ($i>0 and $y<=6 and $this->board[$y][$i] == $color){
                 $streak++;
                 $i--;
                 $y++;
