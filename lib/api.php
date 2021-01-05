@@ -9,7 +9,6 @@ $input = json_decode(file_get_contents('php://input'), true);
 $r = array_shift($request);
 
 if ($r == 'resetboard' && $method == 'POST') {
-
     $_SESSION['board'] = new Board(); //Αρχικοποίηση board σε Session για να μην το χάσω
     $_SESSION['playing'] = 'R'; //Παίζει πρώτος ο κόκκινος
 
