@@ -53,6 +53,7 @@ class Player
                             }
                         }
                     }
+                    header("Content-type: application/json; charset=utf-8");
                     print json_encode(["loginStatus"=>"Συνδέθηκες με επιτυχία!"]);
 
                     $sql = "update player set status = 1 , color = ? where username = ?"; //Πέρασμα στην βάση ως συνδεδεμένος χρήστης και το χρώμα του
@@ -65,6 +66,7 @@ class Player
                     $this->status=1;
                 } else {
                     header("HTTP/1.1 400 Bad Request");
+                    header("Content-type: application/json; charset=utf-8");
                     print json_encode(["errormesg" => "Είσαι ήδη συνδεδεμένος!"]);
                     exit;
                 }

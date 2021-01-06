@@ -28,8 +28,10 @@ if ($r == 'resetboard' && $method == 'POST') {
 
                 if ($winFlag) { //Αν η κίνηση είναι νικητήρια εμφάνισε τον νικητή και κάνε reset το board
                     if ($input['outputType'] == "json") {//Για λόγους debugging και κατανόησης του board τον εμφανίζω κατάλληλα
+                        header("Content-type: application/json; charset=utf-8");
                         print json_encode($board->getBoard(), JSON_PRETTY_PRINT);
                     }
+                    header("Content-type: application/json; charset=utf-8");
                     print json_encode(['winmesg' => "The winner is " . $input['username'] . "!"]);
                     $_SESSION['board'] = new Board();
                 }
@@ -37,23 +39,26 @@ if ($r == 'resetboard' && $method == 'POST') {
             } else {
                 //Αν η στήλη x που επιλέχθηκε είναι γεμάτη
                 header("HTTP/1.1 400 Bad Request");
+                header("Content-type: application/json; charset=utf-8");
                 print json_encode(['errormesg' => "Δεν μπορείς να τοποθετήσεις στο $x"]);
             }
         } else {
             //Αν το χρώμα του παίκτη που παίζει δεν αντιστοιχεί στο δικό σου
             header("HTTP/1.1 400 Bad Request");
-            print json_encode(['errormesg' => "Δεν είναι η σειρά σου. Σειρά έχει ο " .$turn['username']]);
+            header("Content-type: application/json; charset=utf-8");
+            print json_encode(['errormesg' => "Δεν είναι η σειρά σου. Σειρά έχει ο " . $turn['username']]);
         }
     }else{
         //Αν προσπαθήσει να κάνει κίνηση χωρίς να είναι συνδεδεμένος
         header("HTTP/1.1 400 Bad Request");
+        header("Content-type: application/json; charset=utf-8");
         print json_encode(['errormesg' => "Δεν είσαι συνδεδεμένος και δεν μπορείς να εκτελέσεις αυτήν την λειτουργία!"]);
     }
 } elseif ($r == 'showboard' && $method == 'GET') {
 
     $board = $_SESSION['board'];
     if ($_GET['outputType'] == "json") {//Για λόγους debugging και κατανόησης του board εμφανίζεται κατάλληλα
-        print json_encode($board->getBoard(), JSON_PRETTY_PRINT);
+        print json_encode($board->getBoard());
     } else {
         $board->show_board();
     }
@@ -62,6 +67,7 @@ if ($r == 'resetboard' && $method == 'POST') {
 
     if(!isset($input['username']) or !isset($input['password'])) {
         header("HTTP/1.1 400 Bad Request");
+        header("Content-type: application/json; charset=utf-8");
         print json_encode(['errormesg'=>"Δεν έδωσες username ή password."]);
         exit;
     }else {
@@ -79,9 +85,11 @@ if ($r == 'resetboard' && $method == 'POST') {
     }else{
         if(isset($_SESSION[$username])) {
             header("HTTP/1.1 400 Bad Request");
+            header("Content-type: application/json; charset=utf-8");
             print json_encode(['errormesg' => "Δεν είσαι συνδεδεμένος και δεν μπορείς να εκτελέσεις αυτήν την λειτουργία!"]);
         }else{
             header("HTTP/1.1 400 Bad Request");
+            header("Content-type: application/json; charset=utf-8");
             print json_encode(['errormesg'=>"Δεν έδωσες username."]);
 
         }
