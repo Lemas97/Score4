@@ -1,4 +1,27 @@
 <?php
+
+if (isset($_SERVER['HTTP_ORIGIN'])) {
+    // Decide if the origin in $_SERVER['HTTP_ORIGIN'] is one
+    // you want to allow, and if so:
+    header("Access-Control-Allow-Origin: {$_SERVER['HTTP_ORIGIN']}");
+    header('Access-Control-Allow-Credentials: true');
+    header('Access-Control-Max-Age: 86400');    // cache for 1 day
+}
+
+// Access-Control headers are received during OPTIONS requests
+if ($_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+
+    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_METHOD']))
+        // may also be using PUT, PATCH, HEAD etc
+        header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+
+    if (isset($_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']))
+        header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
+
+    exit(0);
+}
+
+
 require_once "board.php";
 require_once "player.php";
 session_start();
@@ -28,11 +51,9 @@ if ($r == 'resetboard' && $method == 'POST') {
 
                 if ($winFlag) { //Αν η κίνηση είναι νικητήρια εμφάνισε τον νικητή και κάνε reset το board
                     if ($input['outputType'] == "json") {//Για λόγους debugging και κατανόησης του board τον εμφανίζω κατάλληλα
-                        header("Content-type: application/json; charset=utf-8");
-                        print json_encode($board->getBoard(), JSON_PRETTY_PRINT);
+                        print json_encode($board->getBoard(), JSON_UNESCAPED_UNICODE);
                     }
-                    header("Content-type: application/json; charset=utf-8");
-                    print json_encode(['winmesg' => "The winner is " . $input['username'] . "!"]);
+                    print json_encode(['winmesg' => "The winner is " . $input['username'] . "!"],JSON_UNESCAPED_UNICODE);
                     $_SESSION['board'] = new Board();
                 }
 
@@ -40,25 +61,26 @@ if ($r == 'resetboard' && $method == 'POST') {
                 //Αν η στήλη x που επιλέχθηκε είναι γεμάτη
                 header("HTTP/1.1 400 Bad Request");
                 header("Content-type: application/json; charset=utf-8");
-                print json_encode(['errormesg' => "Δεν μπορείς να τοποθετήσεις στο $x"]);
+                print json_encode(['errormesg' => "Δεν μπορείς να τοποθετήσεις στο $x"],JSON_UNESCAPED_UNICODE);
             }
         } else {
             //Αν το χρώμα του παίκτη που παίζει δεν αντιστοιχεί στο δικό σου
             header("HTTP/1.1 400 Bad Request");
             header("Content-type: application/json; charset=utf-8");
-            print json_encode(['errormesg' => "Δεν είναι η σειρά σου. Σειρά έχει ο " . $turn['username']]);
+            print json_encode(['errormesg' => "Δεν είναι η σειρά σου. Σειρά έχει ο " . $turn['username']],JSON_UNESCAPED_UNICODE);
         }
     }else{
         //Αν προσπαθήσει να κάνει κίνηση χωρίς να είναι συνδεδεμένος
         header("HTTP/1.1 400 Bad Request");
         header("Content-type: application/json; charset=utf-8");
-        print json_encode(['errormesg' => "Δεν είσαι συνδεδεμένος και δεν μπορείς να εκτελέσεις αυτήν την λειτουργία!"]);
+        print json_encode(['errormesg' => "Δεν είσαι συνδεδεμένος και δεν μπορείς να εκτελέσεις αυτήν την λειτουργία!"],JSON_UNESCAPED_UNICODE);
     }
 } elseif ($r == 'showboard' && $method == 'GET') {
 
-    $board = $_SESSION['board'];
+    $board = new $_SESSION("board") ;
+
     if ($_GET['outputType'] == "json") {//Για λόγους debugging και κατανόησης του board εμφανίζεται κατάλληλα
-        print json_encode($board->getBoard());
+        print json_encode($board->getBoard(),JSON_UNESCAPED_UNICODE);
     } else {
         $board->show_board();
     }
@@ -68,17 +90,25 @@ if ($r == 'resetboard' && $method == 'POST') {
     if(!isset($input['username']) or !isset($input['password'])) {
         header("HTTP/1.1 400 Bad Request");
         header("Content-type: application/json; charset=utf-8");
-        print json_encode(['errormesg'=>"Δεν έδωσες username ή password."]);
+        print json_encode(['errormesg'=>"Δεν έδωσες username ή password."],JSON_UNESCAPED_UNICODE);
         exit;
     }else {
         //Αν δόθηκε password και username
         $username = $input['username'];
         $password = $input['password'];
-        $_SESSION[$username] = new Player($username,$password);
+        //$_SESSION[$username] = new Player($username,$password);
+        $player = new Player($username,$password);
+
+        header("HTTP/1.1 200 OK");
+        header("Content-type: application/json; charset=utf-8");
+        print json_encode(["loginStatus" => "Συνδέθηκες με επιτυχία!", "color" => $player->getColor()], JSON_UNESCAPED_UNICODE);
+        exit;
+
     }
 
 } elseif ($r == 'logout' && $method == 'GET') {
     $username = $_GET['username'];
+
     if(isset($_SESSION[$username]) && $_SESSION[$username]->checkStatus()) {
         //Αν υπάρχει στο Session το username και είναι συνδεδεμένο το username κάνει logout
         $_SESSION[$username]->logout();
@@ -86,18 +116,17 @@ if ($r == 'resetboard' && $method == 'POST') {
         if(isset($_SESSION[$username])) {
             header("HTTP/1.1 400 Bad Request");
             header("Content-type: application/json; charset=utf-8");
-            print json_encode(['errormesg' => "Δεν είσαι συνδεδεμένος και δεν μπορείς να εκτελέσεις αυτήν την λειτουργία!"]);
+            print json_encode(['errormesg' => "Δεν είσαι συνδεδεμένος και δεν μπορείς να εκτελέσεις αυτήν την λειτουργία!"],JSON_UNESCAPED_UNICODE);
         }else{
             header("HTTP/1.1 400 Bad Request");
             header("Content-type: application/json; charset=utf-8");
-            print json_encode(['errormesg'=>"Δεν έδωσες username."]);
+            print json_encode(['errormesg'=>"Δεν έδωσες username."],JSON_UNESCAPED_UNICODE);
 
         }
     }
 } else {
     header("HTTP/1.1 400 Bad Request");
 }
-
 exit;
 
 ?>
